@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
+import { RedirectionsModule } from './redirections/redirections.module';
 
 @Module({
-  imports: [],
+  imports: [RedirectionsModule],
   controllers: [],
   providers: [AppService],
 })
