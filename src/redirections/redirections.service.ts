@@ -74,8 +74,6 @@ export class RedirectionsService {
       throw error;
     }
 
-    await this.knex('visits').insert({ redirection_id: redirection.id });
-
     redirection = await this.knex('redirections')
       .first([
         'redirections.*',
@@ -131,5 +129,24 @@ export class RedirectionsService {
     const redirection = await this.getRedirectionDetailsBySlug(slug);
     await this.trackRedirectionVisit(slug);
     return { url: redirection.url };
+  }
+
+  /**
+   * Deletes a redirection by slug
+   * @param {string} slug
+   * @returns {Promise<any>}
+   */
+  async deleteRedirectionBySlug(slug: string) {
+    const redirection = await this.getRedirectionBySlug(slug);
+
+    if (!redirection) {
+      const error = new NotFoundException('Redirection not found');
+      error.name = 'RedirectionNotFound';
+      throw error;
+    }
+
+    await this.knex('redirections').where({ slug }).delete();
+
+    return redirection;
   }
 }

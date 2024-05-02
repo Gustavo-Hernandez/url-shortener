@@ -1,5 +1,5 @@
 import * as express from 'express';
-import { Body, Controller, Get, Param, Post, Res } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Res } from '@nestjs/common';
 
 import { RedirectionsService } from './redirections.service';
 
@@ -30,5 +30,11 @@ export class RedirectionsController {
     } catch (error) {
       return res.status(404).send('Not found');
     }
+  }
+
+  @Delete('/:slug')
+  async deleteRedirection(@Param('slug') slug: string) {
+    const deletedRedirection = await this.redirectionsService.deleteRedirectionBySlug(slug);
+    return deletedRedirection;
   }
 }

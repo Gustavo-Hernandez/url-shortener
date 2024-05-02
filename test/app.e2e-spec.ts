@@ -33,8 +33,15 @@ describe('AppController (e2e)', () => {
   });
 
   describe('Redirections', () => {
+    it('should not exist any redirection', async () => {
+      const redirections = await knexService.getKnex().select().from('redirections');
+      const visits = await knexService.getKnex().select().from('visits');
+      expect(redirections).toHaveLength(0);
+      expect(visits).toHaveLength(0);
+    });
+
     it('should create a redirection', async () => {
-      return pactum
+      const res = await pactum
         .spec()
         .post('/create')
         .withBody({
@@ -50,10 +57,15 @@ describe('AppController (e2e)', () => {
           additionalProperties: false,
         })
         .stores('slug', 'slug');
+
+      const redirections = await knexService.getKnex().select().from('redirections');
+      expect(redirections).toHaveLength(1);
+
+      return res;
     });
 
     it('should not create a redirection with invalid URL', async () => {
-      return pactum
+      const res = await pactum
         .spec()
         .post('/create')
         .withBody({
@@ -65,6 +77,25 @@ describe('AppController (e2e)', () => {
           message: 'Invalid URL, must include http:// or https://',
           error: 'Bad Request',
         });
+
+      const redirections = await knexService.getKnex().select().from('redirections');
+      expect(redirections).toHaveLength(1);
+
+      return res;
+    });
+
+    it('should redirect', async () => {
+      const res = await pactum
+        .spec()
+        .get('/{slug}')
+        .withPathParams('slug', '$S{slug}')
+        .expectStatus(301)
+        .expectHeader('location', 'https://nestjs.com');
+
+      const visits = await knexService.getKnex().select().from('visits');
+      expect(visits).toHaveLength(1);
+
+      return res;
     });
 
     it('should get redirection details', async () => {
@@ -103,18 +134,15 @@ describe('AppController (e2e)', () => {
         .expectJson('url', 'https://nestjs.com');
     });
 
-    it('should redirect', async () => {
-      const response = pactum
-        .spec()
-        .get('/{slug}')
-        .withPathParams('slug', '$S{slug}')
-        .expectStatus(301)
-        .expectHeader('location', 'https://nestjs.com');
+    it('should delete a redirection', async () => {
+      const existingRedirections = await knexService.getKnex().select().from('redirections');
+      expect(existingRedirections).toHaveLength(1);
 
-      const visits = await knexService.getKnex().select().from('visits');
-      expect(visits).toHaveLength(1);
+      const res = await pactum.spec().delete('/{slug}').withPathParams('slug', '$S{slug}').expectStatus(200);
+      const redirections = await knexService.getKnex().select().from('redirections');
+      expect(redirections).toHaveLength(0);
 
-      return response;
+      return res;
     });
   });
 });
