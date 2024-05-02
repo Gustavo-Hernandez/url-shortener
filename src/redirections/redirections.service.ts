@@ -33,7 +33,21 @@ export class RedirectionsService {
    */
   async createRedirection(dto: CreateRedirectionDto) {
     const expirationDate = moment().startOf('day').add(30, 'days').toISOString();
-    const slug = await this.generateSlug();
+    let slug = '';
+
+    if (dto.customSlug) {
+      const existingRedirection = await this.knex('redirections').where({ slug: dto.customSlug }).first();
+
+      if (existingRedirection) {
+        const error = new BadRequestException('Slug already exists');
+        error.name = 'SlugAlreadyExists';
+        throw error;
+      }
+
+      slug = dto.customSlug;
+    } else {
+      slug = await this.generateSlug();
+    }
 
     if (!dto.url.includes('http://') && !dto.url.includes('https://')) {
       const error = new BadRequestException('Invalid URL, must include http:// or https://');
@@ -43,8 +57,9 @@ export class RedirectionsService {
 
     const [redirection] = await this.knex('redirections')
       .insert({
-        ...dto,
         slug,
+        url: dto.url,
+        source: dto.source,
         expiration_date: expirationDate,
       })
       .returning('slug');

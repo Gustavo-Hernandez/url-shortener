@@ -213,5 +213,59 @@ describe('AppController (e2e)', () => {
 
       return res;
     });
+
+    it('should not delete a redirection that does not exist', async () => {
+      return pactum.spec().delete('/invalid-slug').expectStatus(404).expectJson({
+        statusCode: 404,
+        message: 'Redirection not found',
+        error: 'Not Found',
+      });
+    });
+
+    it('should allow to create a redirection with custom slug', async () => {
+      const res = await pactum
+        .spec()
+        .post('/create')
+        .withBody({
+          url: 'https://nestjs.com',
+          customSlug: 'custom-slug',
+        })
+        .expectStatus(201)
+        .expectJsonSchema({
+          type: 'object',
+          properties: {
+            slug: { type: 'string' },
+          },
+          required: ['slug'],
+          additionalProperties: false,
+        })
+        .stores('slug', 'slug');
+
+      const redirections = await knexService.getKnex().select().from('redirections');
+      expect(redirections).toHaveLength(1);
+
+      return res;
+    });
+  });
+
+  it('should not allow to create a redirection with custom slug that already exists', async () => {
+    const res = await pactum
+      .spec()
+      .post('/create')
+      .withBody({
+        url: 'https://nestjs.com',
+        customSlug: 'custom-slug',
+      })
+      .expectStatus(400)
+      .expectJson({
+        statusCode: 400,
+        message: 'Slug already exists',
+        error: 'Bad Request',
+      });
+
+    const redirections = await knexService.getKnex().select().from('redirections');
+    expect(redirections).toHaveLength(1);
+
+    return res;
   });
 });
