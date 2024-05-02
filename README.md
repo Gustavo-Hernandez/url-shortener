@@ -16,9 +16,9 @@ Docker: A platform for developing, shipping, and running applications in contain
 ## Docker
 For containerization using Docker, you can utilize the following command:
 
-docker:compose-up: Start the Docker containers defined in the docker-compose.yml file.
+`docker:compose-up`: Start the Docker containers defined in the docker-compose.yml file.
 ```bash
-$ dotenv -e .env -- docker-compose -f docker-compose.yml up -d
+$ npm run docker:compose-up
 ```
 This command orchestrates the setup defined in the docker-compose.yml file using docker-compose. It's a convenient way to launch your application within Docker containers.
 
@@ -44,18 +44,18 @@ $ npm run start:prod
 ## Knex Commands
 To manage database migrations with Knex.js, you can use the following commands:
 
-knex:migrate-latest: Run the latest database migrations.
+`knex:migrate-latest`: Run the latest database migrations.
 ```bash
-$ knex migrate:latest
+$ npm run knex:migrate-latest
 ```
 
-knex:migrate-rollback: Rollback the last batch of database migrations.
+`knex:migrate-rollback`: Rollback the last batch of database migrations.
 ```bash
-$ knex migrate:rollback
+$ npm run knex:migrate-rollback
 ```
-knex:create-migration: Create a new database migration file.
+`knex:create-migration`: Create a new database migration file.
 ```bash
-knex migrate:make [migration_name]
+$ npm run knex:create-migration [migration_name]
 ```
 Replace [migration_name] with a descriptive name for your migration.
 These commands allow you to easily manage your database schema changes and keep your application's database structure up-to-date.
