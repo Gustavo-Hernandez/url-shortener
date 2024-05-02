@@ -1,30 +1,26 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
-
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
-
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This repository contains an implementation of a URL shortener service built with NestJS, utilizing Knex.js as the query builder, PostgreSQL as the database management system, and Docker for containerization. The URL shortener service allows users to generate short URLs for long web addresses, making them easier to share and manage.
+
+## Features
+URL Shortening: Convert long URLs into shorter, more manageable links.
+Link Management: View, update, and delete shortened URLs as needed.
+Statistics: Track basic statistics such as click counts and last accessed timestamp for each shortened URL.
+
+## Technologies Used
+NestJS: A progressive Node.js framework for building efficient, reliable, and scalable server-side applications.
+Knex.js: A SQL query builder for Node.js, designed to be flexible, portable, and fun to use.
+PostgreSQL: An open-source relational database management system known for its reliability, robustness, and performance.
+Docker: A platform for developing, shipping, and running applications in containers.
+
+## Docker
+For containerization using Docker, you can utilize the following command:
+
+docker:compose-up: Start the Docker containers defined in the docker-compose.yml file.
+```bash
+$ dotenv -e .env -- docker-compose -f docker-compose.yml up -d
+```
+This command orchestrates the setup defined in the docker-compose.yml file using docker-compose. It's a convenient way to launch your application within Docker containers.
 
 ## Installation
 
@@ -45,29 +41,27 @@ $ npm run start:dev
 $ npm run start:prod
 ```
 
-## Test
+## Knex Commands
+To manage database migrations with Knex.js, you can use the following commands:
 
+knex:migrate-latest: Run the latest database migrations.
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+$ knex migrate:latest
 ```
 
-## Support
+knex:migrate-rollback: Rollback the last batch of database migrations.
+```bash
+$ knex migrate:rollback
+```
+knex:create-migration: Create a new database migration file.
+```bash
+knex migrate:make [migration_name]
+```
+Replace [migration_name] with a descriptive name for your migration.
+These commands allow you to easily manage your database schema changes and keep your application's database structure up-to-date.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Run E2E Tests
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](LICENSE).
+```bash
+$ npm run test:e2e
+```

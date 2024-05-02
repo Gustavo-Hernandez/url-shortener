@@ -61,7 +61,7 @@ export class RedirectionsService {
     let redirection = await this.knex('redirections').where({ slug }).first();
 
     if (!redirection) {
-      const error = new Error('Redirection not found');
+      const error = new NotFoundException('Redirection not found');
       error.name = 'RedirectionNotFound';
       throw error;
     }
@@ -148,5 +148,31 @@ export class RedirectionsService {
     await this.knex('redirections').where({ slug }).delete();
 
     return redirection;
+  }
+
+  /**
+   * Updates a redirection by slug
+   * @param {string} slug
+   * @param {CreateRedirectionDto} dto
+   * @returns {Promise<any>}
+   */
+  async updateRedirectionBySlug(slug: string, dto: { url: string }) {
+    const redirection = await this.getRedirectionBySlug(slug);
+
+    if (!redirection) {
+      const error = new NotFoundException('Redirection not found');
+      error.name = 'RedirectionNotFound';
+      throw error;
+    }
+
+    if (!dto.url.includes('http://') && !dto.url.includes('https://')) {
+      const error = new BadRequestException('Invalid URL, must include http:// or https://');
+      error.name = 'InvalidUrl';
+      throw error;
+    }
+
+    await this.knex('redirections').where({ slug }).update(dto);
+
+    return { ...redirection, ...dto };
   }
 }

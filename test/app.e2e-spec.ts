@@ -134,6 +134,75 @@ describe('AppController (e2e)', () => {
         .expectJson('url', 'https://nestjs.com');
     });
 
+    it('should not get redirection details for invalid slug', async () => {
+      return pactum.spec().get('/details/invalid-slug').expectStatus(404).expectJson({
+        statusCode: 404,
+        message: 'Redirection not found',
+        error: 'Not Found',
+      });
+    });
+
+    it('should update a redirection', async () => {
+      const res = await pactum
+        .spec()
+        .put('/{slug}')
+        .withPathParams('slug', '$S{slug}')
+        .withBody({
+          url: 'https://nestjs.io',
+        })
+        .expectStatus(200)
+        .expectJsonSchema({
+          type: 'object',
+          properties: {
+            slug: { type: 'string' },
+          },
+          required: ['slug'],
+        });
+
+      const redirections = await knexService.getKnex().select().from('redirections');
+      expect(redirections).toHaveLength(1);
+
+      return res;
+    });
+
+    it('should not update a redirection with invalid URL', async () => {
+      const res = await pactum
+        .spec()
+        .put('/{slug}')
+        .withPathParams('slug', '$S{slug}')
+        .withBody({
+          url: 'nestjs.io',
+        })
+        .expectStatus(400)
+        .expectJson({
+          statusCode: 400,
+          message: 'Invalid URL, must include http:// or https://',
+          error: 'Bad Request',
+        });
+
+      const redirections = await knexService.getKnex().select().from('redirections');
+      expect(redirections).toHaveLength(1);
+
+      return res;
+    });
+
+    it('should not update a redirection that does not exist', async () => {
+      const res = await pactum
+        .spec()
+        .put('/invalid-slug')
+        .withBody({
+          url: 'https://nestjs.io',
+        })
+        .expectStatus(404)
+        .expectJson({
+          statusCode: 404,
+          message: 'Redirection not found',
+          error: 'Not Found',
+        });
+
+      return res;
+    });
+
     it('should delete a redirection', async () => {
       const existingRedirections = await knexService.getKnex().select().from('redirections');
       expect(existingRedirections).toHaveLength(1);
