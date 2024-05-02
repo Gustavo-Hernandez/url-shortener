@@ -10,6 +10,7 @@ export class CreateRedirectionDto {
 
   @IsString()
   @IsNotEmpty()
+  @IsUrl()
   @IsIn(REDIRECTION_SOURCE_TYPES_LIST)
   source: string;
 }

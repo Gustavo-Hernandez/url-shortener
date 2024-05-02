@@ -16,4 +16,8 @@ export class KnexService {
     await this.knex.raw('DROP SCHEMA public CASCADE; CREATE SCHEMA public;');
     await this.knex.migrate.latest();
   }
+
+  getKnex() {
+    return this.knex;
+  }
 }

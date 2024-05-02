@@ -33,16 +33,13 @@ describe('AppController (e2e)', () => {
   });
 
   describe('Redirections', () => {
-    const createRedirectionDto = {
-      url: 'https://nestjs.com',
-      source: 'system',
-    };
-
     it('should create a redirection', async () => {
       return pactum
         .spec()
-        .post('/')
-        .withBody(createRedirectionDto)
+        .post('/create')
+        .withBody({
+          url: 'https://nestjs.com',
+        })
         .expectStatus(201)
         .expectJsonSchema({
           type: 'object',
@@ -55,13 +52,27 @@ describe('AppController (e2e)', () => {
         .stores('slug', 'slug');
     });
 
+    it('should not create a redirection with invalid URL', async () => {
+      return pactum
+        .spec()
+        .post('/create')
+        .withBody({
+          url: 'nestjs.com',
+        })
+        .expectStatus(400)
+        .expectJson({
+          statusCode: 400,
+          message: 'Invalid URL, must include http:// or https://',
+          error: 'Bad Request',
+        });
+    });
+
     it('should get redirection details', async () => {
       return pactum
         .spec()
         .get('/details/{slug}')
         .withPathParams('slug', '$S{slug}')
         .expectStatus(200)
-        .inspect()
         .expectJsonSchema({
           type: 'object',
           properties: {
@@ -90,6 +101,20 @@ describe('AppController (e2e)', () => {
         })
         .expectJson('visits_count', '1')
         .expectJson('url', 'https://nestjs.com');
+    });
+
+    it('should redirect', async () => {
+      const response = pactum
+        .spec()
+        .get('/{slug}')
+        .withPathParams('slug', '$S{slug}')
+        .expectStatus(301)
+        .expectHeader('location', 'https://nestjs.com');
+
+      const visits = await knexService.getKnex().select().from('visits');
+      expect(visits).toHaveLength(1);
+
+      return response;
     });
   });
 });

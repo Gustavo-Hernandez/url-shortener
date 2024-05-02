@@ -1,8 +1,8 @@
 import { Knex } from 'knex';
-import * as shortUUID from 'short-uuid';
+import * as shortUniqueId from 'short-unique-id';
 import * as moment from 'moment';
 
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection } from 'nest-knexjs';
 
 import { CreateRedirectionDto } from './dto/create-redirection.dto';
@@ -17,9 +17,11 @@ export class RedirectionsService {
    * @private
    */
   private async generateSlug() {
-    let slug = shortUUID.generate();
+    const uidGen = new shortUniqueId({ length: 6 });
+    let slug = uidGen.rnd();
+
     while (await this.knex('redirections').where({ slug }).first()) {
-      slug = shortUUID.generate();
+      slug = uidGen.rnd();
     }
     return slug;
   }
@@ -32,6 +34,12 @@ export class RedirectionsService {
   async createRedirection(dto: CreateRedirectionDto) {
     const expirationDate = moment().startOf('day').add(30, 'days').toISOString();
     const slug = await this.generateSlug();
+
+    if (!dto.url.includes('http://') && !dto.url.includes('https://')) {
+      const error = new BadRequestException('Invalid URL, must include http:// or https://');
+      error.name = 'InvalidUrl';
+      throw error;
+    }
 
     const [redirection] = await this.knex('redirections')
       .insert({
@@ -79,5 +87,49 @@ export class RedirectionsService {
       .where({ slug });
 
     return redirection;
+  }
+
+  /**
+   * Retrieves a redirection by slug
+   * @param {string} slug
+   * @returns {Promise<any>}
+   */
+  async getRedirectionBySlug(slug: string) {
+    if (!slug) {
+      const error = new BadRequestException('Slug is required');
+      error.name = 'MissingSlug';
+      throw error;
+    }
+    const redirection = await this.knex('redirections').where({ slug }).first();
+    return redirection;
+  }
+
+  /**
+   * Tracks a redirection visit
+   * @param {string} slug
+   * @returns {Promise<void>}
+   */
+  async trackRedirectionVisit(slug: string) {
+    const redirection = await this.getRedirectionBySlug(slug);
+
+    if (!redirection) {
+      const error = new NotFoundException('Redirection not found');
+      error.name = 'RedirectionNotFound';
+      throw error;
+    }
+
+    const newVisit = await this.knex('visits').insert({ redirection_id: redirection.id });
+    return newVisit;
+  }
+
+  /**
+   * Redirects to the URL associated with the slug
+   * @param {string} slug
+   * @returns {Promise<{ url: string }>}
+   */
+  async redirect(slug: string) {
+    const redirection = await this.getRedirectionDetailsBySlug(slug);
+    await this.trackRedirectionVisit(slug);
+    return { url: redirection.url };
   }
 }
