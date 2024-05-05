@@ -1,12 +1,13 @@
 import { Knex } from 'knex';
 import * as shortUniqueId from 'short-unique-id';
 import * as moment from 'moment';
-
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectConnection } from 'nest-knexjs';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+
+import { REDIRECTION_SOURCE_TYPE_API } from './redirections.constants';
 
 import { CreateRedirectionDto } from './dto/create-redirection.dto';
-import { REDIRECTION_SOURCE_TYPE_API } from './redirections.constants';
+import { RedirectDto } from './dto/redirect-dto';
 
 @Injectable()
 export class RedirectionsService {
@@ -123,8 +124,8 @@ export class RedirectionsService {
    * @param {string} slug
    * @returns {Promise<void>}
    */
-  async trackRedirectionVisit(slug: string) {
-    const redirection = await this.getRedirectionBySlug(slug);
+  async trackRedirectionVisit(dto: RedirectDto) {
+    const redirection = await this.getRedirectionBySlug(dto.slug);
 
     if (!redirection) {
       const error = new NotFoundException('Redirection not found');
@@ -132,7 +133,28 @@ export class RedirectionsService {
       throw error;
     }
 
-    const newVisit = await this.knex('visits').insert({ redirection_id: redirection.id });
+    const visitData = {
+      redirection_id: redirection.id,
+      user_agent: dto.userAgent,
+      ip: dto.requestIp,
+      language: dto.language,
+      platform: dto.platform,
+      browser: dto.browser,
+      device: dto.device,
+      os: dto.os,
+      country: dto.country,
+      region: dto.region,
+      city: dto.city,
+    };
+
+    // Remove undefined values
+    const filteredVisitData = Object.fromEntries(Object.entries(visitData).filter(([_, v]) => v !== undefined)); // eslint-disable-line @typescript-eslint/no-unused-vars
+    if (!Object.keys(filteredVisitData).length) {
+      console.warn(`No visit data to track for redirection ${dto.slug}`);
+      return;
+    }
+
+    const [newVisit] = await this.knex('visits').insert(filteredVisitData).returning('*');
     return newVisit;
   }
 
@@ -141,9 +163,9 @@ export class RedirectionsService {
    * @param {string} slug
    * @returns {Promise<{ url: string }>}
    */
-  async redirect(slug: string) {
-    const redirection = await this.getRedirectionDetailsBySlug(slug);
-    await this.trackRedirectionVisit(slug);
+  async redirect(dto: RedirectDto) {
+    const redirection = await this.getRedirectionDetailsBySlug(dto.slug);
+    await this.trackRedirectionVisit(dto);
     return { url: redirection.url };
   }
 

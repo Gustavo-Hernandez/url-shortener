@@ -89,7 +89,7 @@ describe('AppController (e2e)', () => {
         .spec()
         .get('/{slug}')
         .withPathParams('slug', '$S{slug}')
-        .expectStatus(301)
+        .expectStatus(302)
         .expectHeader('location', 'https://nestjs.com');
 
       const visits = await knexService.getKnex().select().from('visits');
