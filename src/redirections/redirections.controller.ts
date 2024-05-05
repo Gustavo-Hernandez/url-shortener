@@ -2,6 +2,7 @@ import * as express from 'express';
 import { Body, Controller, Delete, Get, Param, Post, Put, Res } from '@nestjs/common';
 
 import { RedirectionsService } from './redirections.service';
+import { CreateRedirectionDto } from './dto/create-redirection.dto';
 
 @Controller('/')
 export class RedirectionsController {
@@ -18,8 +19,8 @@ export class RedirectionsController {
   }
 
   @Post('/create')
-  async createRedirection(@Body() dto: { url: string }) {
-    return this.redirectionsService.createRedirection({ ...dto, source: 'system' });
+  async createRedirection(@Body() dto: CreateRedirectionDto) {
+    return this.redirectionsService.createRedirection(dto);
   }
 
   @Get('/:slug')

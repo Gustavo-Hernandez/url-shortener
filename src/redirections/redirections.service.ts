@@ -6,6 +6,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { InjectConnection } from 'nest-knexjs';
 
 import { CreateRedirectionDto } from './dto/create-redirection.dto';
+import { REDIRECTION_SOURCE_TYPE_API } from './redirections.constants';
 
 @Injectable()
 export class RedirectionsService {
@@ -59,7 +60,7 @@ export class RedirectionsService {
       .insert({
         slug,
         url: dto.url,
-        source: dto.source,
+        source: dto.source || REDIRECTION_SOURCE_TYPE_API,
         expiration_date: expirationDate,
       })
       .returning('slug');

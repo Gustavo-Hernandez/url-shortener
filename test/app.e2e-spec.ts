@@ -248,6 +248,48 @@ describe('AppController (e2e)', () => {
     });
   });
 
+  it('should not allow to create a redirection with custom slug with less than 3 characters', async () => {
+    const res = await pactum
+      .spec()
+      .post('/create')
+      .withBody({
+        url: 'https://nestjs.com',
+        customSlug: 'a',
+      })
+      .expectStatus(400)
+      .expectJson({
+        statusCode: 400,
+        message: ['customSlug must be longer than or equal to 3 characters'],
+        error: 'Bad Request',
+      });
+
+    const redirections = await knexService.getKnex().select().from('redirections');
+    expect(redirections).toHaveLength(1);
+
+    return res;
+  });
+
+  it('should not allow to create a redirection with custom slug with more than 16 characters', async () => {
+    const res = await pactum
+      .spec()
+      .post('/create')
+      .withBody({
+        url: 'https://nestjs.com',
+        customSlug: 'a'.repeat(17),
+      })
+      .expectStatus(400)
+      .expectJson({
+        statusCode: 400,
+        message: ['customSlug must be shorter than or equal to 16 characters'],
+        error: 'Bad Request',
+      });
+
+    const redirections = await knexService.getKnex().select().from('redirections');
+    expect(redirections).toHaveLength(1);
+
+    return res;
+  });
+
   it('should not allow to create a redirection with custom slug that already exists', async () => {
     const res = await pactum
       .spec()
