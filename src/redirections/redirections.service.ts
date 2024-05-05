@@ -98,6 +98,25 @@ export class RedirectionsService {
         this.knex.raw(
           '(SELECT MAX(created_at) FROM visits WHERE visits.redirection_id = redirections.id) as last_visited_at',
         ),
+        this.knex.raw(`(
+          SELECT COALESCE(json_agg(
+            json_build_object(
+              'id', visits.id,
+              'createdAt', visits.created_at,
+              'userAgent', visits.user_agent,
+              'language', visits.language,
+              'platform', visits.platform,
+              'browser', visits.browser,
+              'device', visits.device,
+              'os', visits.os,
+              'ip', visits.ip,
+              'country', visits.country,
+              'region', visits.region,
+              'city', visits.city
+            )), '[]')
+          FROM visits
+          WHERE visits.redirection_id = redirections.id
+        ) as details`),
       ])
       .where({ slug });
 

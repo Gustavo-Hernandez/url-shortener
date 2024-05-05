@@ -116,6 +116,27 @@ describe('AppController (e2e)', () => {
             source: { type: 'string' },
             visits_count: { type: 'string' },
             last_visited_at: { type: 'string' },
+            details: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  id: { type: 'number' },
+                  createdAt: { type: 'string' },
+                  userAgent: { type: ['string', 'null'] },
+                  language: { type: ['string', 'null'] },
+                  platform: { type: ['string', 'null'] },
+                  browser: { type: ['string', 'null'] },
+                  device: { type: ['string', 'null'] },
+                  os: { type: ['string', 'null'] },
+                  ip: { type: ['string', 'null'] },
+                  country: { type: ['string', 'null'] },
+                  region: { type: ['string', 'null'] },
+                  city: { type: ['string', 'null'] },
+                },
+                required: ['id', 'createdAt'],
+              },
+            },
           },
           required: [
             'id',
