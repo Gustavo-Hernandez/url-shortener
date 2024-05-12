@@ -22,6 +22,13 @@ $ npm run docker:compose-up
 ```
 This command orchestrates the setup defined in the docker-compose.yml file using docker-compose. It's a convenient way to launch your application within Docker containers.
 
+To build and run the Docker container manually, you can use the following commands:
+
+```bash
+$ docker build -t url-shortener .
+$ docker run -p 3000:3000 --name url-shortener -d url-shortener
+```
+
 ## Installation
 
 ```bash
